@@ -1,0 +1,7 @@
+/__pycache__
+cortex_save.npy
+datas/
+*.pyc
+.history
+save/
+.zip
