@@ -1,0 +1,27 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+  
+    {
+      "name": "Python: web_socket.py",
+      "type": "python",
+      "request": "launch",
+      "program": "/Users/laola/CodeProject/Orangutan/web_socket.py",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Python: cortex.py",
+      "type": "python",
+      "request": "launch",
+      "program": "/Users/laola/CodeProject/Orangutan/cortex.py",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Python: Current File (Integrated Terminal)",
+      "type": "python",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal"
+    },
+  ]
+}
