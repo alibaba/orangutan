@@ -28,7 +28,6 @@
     "react-dom": "^18.0.0",
     "v-charts": "^1.19.0",
     "vue": "^2.6.12",
-    "vue-d3-charts": "^0.2.8",
     "vue-konva": "^2.1.7",
     "vue-monaco": "^1.2.2",
     "vue-ref": "^2.0.0",
@@ -69,5 +68,6 @@
   "browserslist": [
     "> 1%",
     "last 2 versions"
-  ]
+  ],
+  "repository": "git@gitlab.alibaba-inc.com:laola.xy/Orangutan.git"
 }
