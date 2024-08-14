@@ -16,7 +16,7 @@ from .abstract_mocker import Abstract_mocker
 attention_result_inds = np.array(
     list(
         itertools.chain(*[
-            get_soma_inds(feature_type, f'{feature_name}的注意力竞争结果')
+            get_soma_inds(feature_type, f'attention_competition_result_of_{feature_name}')
             for feature_type in ['angle', 'contour_center'] for feature_name in {
                 'angle': ANGLE_NAMES,
                 'contour_center': [f'{side}contour_center' for side in CONTOUR_SIDES],

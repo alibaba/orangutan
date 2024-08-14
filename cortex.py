@@ -568,9 +568,9 @@ class Cortex:
             tuple(
                 [
                     get_soma_inds(
-                        "数字",
+                        "number",
                         [
-                            f'前馈{"抑制" if is_inhibit_spine else "预测"}_DMax_棘{i}'
+                            f'fore{"inhibit" if is_inhibit_spine else "predict"}_DMax_spin{i}'
                             for i in range(SPINE_SUM_ON_A_DENDRITE)
                         ],
                         hyper_col_inds_in_region=num,

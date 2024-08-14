@@ -198,7 +198,7 @@ def search_nerve(options, h5_protocol):
             list(list(REGION.values())[region_no -
                                        1]['neurons'].values())[neuron_no -
                                                                100]['name']
-            if region_no != -1 and neuron_no != -1 else '空'
+            if region_no != -1 and neuron_no != -1 else 'none'
             for region_no, neuron_no in zip(
                 cortex['region_no'][search_nerve_inds], cortex['neuron_no']
                 [search_nerve_inds])
@@ -246,7 +246,6 @@ def on_error(ws, error):
 if __name__ == '__main__':
     ws = websocket.WebSocketApp(
         "ws://localhost:8888",
-        # ws = websocket.WebSocketApp("ws://192.168.123.244:8888",
         subprotocols=['python'],
         on_message=on_message,
         on_error=on_error)

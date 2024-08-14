@@ -12,7 +12,6 @@ var ws = new WebSocket(
   "ws://localhost:8888",
   `h5_${urlSearch.replace(/=/g, "")}`
 );
-// var ws = new WebSocket("ws://192.168.123.244:8888", `h5_${urlSearch.replace(/=/g, '')}`);
 window.region = {};
 window.message = message;
 message.config({

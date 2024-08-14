@@ -2417,7 +2417,7 @@ export default {
             this.updateOptions({ leftDrawerTabsActiveKey: activeKey }, false)
           }
         >
-          <Tabs.TabPane key="1" tab="楼层导航">
+          <Tabs.TabPane key="1" tab="floor nav">
             <Space
               direction="vertical"
               style={{
@@ -2501,7 +2501,7 @@ export default {
               </Collapse>
             </Space>
           </Tabs.TabPane>
-          <Tabs.TabPane key="2" tab="搜索">
+          <Tabs.TabPane key="2" tab="search">
             {this.renderSearchNervePanel()}
           </Tabs.TabPane>
         </Tabs>
@@ -2600,7 +2600,7 @@ export default {
                     />
                     <Popconfirm
                       style={{ width: "100%", borderWidth: "0 1px 0 1px" }}
-                      title="确认删除"
+                      title="confirm"
                       onConfirm={() => {
                         this.options.searchNerveExpressions.splice(
                           searchNerveExpressionInd,
@@ -2687,7 +2687,6 @@ export default {
                         borderRadius: "0 4px 0 0",
                       }}
                       onClick={() => {
-                        // 以柱状图形式查看搜索结果
                         this.updateOptions({
                           searchNerveChartInd: searchNerveExpressionInd,
                         });
@@ -2822,7 +2821,7 @@ export default {
       const { region_name } = region;
       return (
         <Input
-          placeholder="脑区X轴偏移量"
+          placeholder="region x offset"
           value={this.options.regionOffsetX[region_name]}
           onPressEnter={(e) => {
             this.changeRegionOffsetX(region_name, e.target.value);
@@ -2859,7 +2858,7 @@ export default {
       let region_shape = raw_region_json["region_shape"];
       return (
         <Form layout="inline">
-          <Form.Item label="脑区名称">
+          <Form.Item label="region name">
             <Input
               value={raw_region_json["region_name"]}
               onBlur={(e) => {
@@ -2867,7 +2866,7 @@ export default {
               }}
             />
           </Form.Item>
-          <Form.Item label="脑区尺寸">
+          <Form.Item label="region size">
             <Input.Group style={{ width: "100%" }} compact>
               <InputNumber
                 placeholder="row no"
@@ -2920,7 +2919,7 @@ export default {
                 >
                   {pinnedId}
                   {/* <Input
-                    addonBefore="限制回路长度"
+                    addonBefore="circuit len limit"
                     size="small"
                     style={{
                       textAlign: 'center',
@@ -3037,7 +3036,7 @@ export default {
             color=""
             onClick={async () => {
               await navigator.clipboard.writeText(value);
-              window.message.success("inner容已复制");
+              window.message.success("content copied");
             }}
             onContextmenu={(e) => {
               e.stopPropagation();
