@@ -40,7 +40,7 @@ class FormNerve():
                                      is_posterior=1):
         cortex = cortex_obj.cortex
 
-        # 获得突触前/后细胞的索引
+        # Obtain the index of pre/post-synaptic cells.
         if pair_mask == 'all_pair':
             pair_mask = np.full(
                 (len(mother_marker_inds), len(father_marker_inds)), True)
@@ -48,7 +48,7 @@ class FormNerve():
         mother_inds = mother_marker_inds[pair_marker_inds_list[0]]
         father_inds = father_marker_inds[pair_marker_inds_list[1]]
 
-        # 强化已存在的突触
+        # Enhance existing synapses.
         new_nerves_existed_mask, new_nerves_existed_inds = self.get_existed_nerves_mask_with_new_nerves(
             cortex_obj, mother_inds, father_inds)
         firmed_existed_nerve_inds = self.firm_existed_nerves(
@@ -58,7 +58,7 @@ class FormNerve():
             father_inds[new_nerves_existed_mask],
             new_nerve_callback=new_nerve_callback)
 
-        # 新建不存在的突触
+        # Create non-existing synapses.
         new_nerve_slice = self.spring_nerve_packs_in_common_way(
             cortex_obj,
             mother_inds[~new_nerves_existed_mask]
@@ -76,31 +76,31 @@ class FormNerve():
 
         cortex['is_synapse'][form_and_firm_nerve_inds] = 2
 
-        # 分配突触前资源，增加LTP
+        # Allocate presynaptic resources, increase Long-Term Potentiation (LTP)
         if callable(add_LTP_lambda):
             add_LTP_lambda(cortex['ind'][new_nerve_slice],
                            firmed_existed_nerve_inds)
 
-        # 更新新增的和被强化的突触的marker_remain
+        # Updating the marker_remain of newly added and strengthened synapses.
         self.update_synapse_marker_remain(cortex_obj, form_and_firm_nerve_inds)
 
         is_STP_nerve_mask = cortex['release_type'][
             form_and_firm_nerve_inds] == RELEASE_TYPE['STP']
         is_STP_nerve_inds = form_and_firm_nerve_inds[is_STP_nerve_mask]
 
-        # # STP突触后膜LTP的增量最大值
+        # # The maximum increment of STP synaptic membrane LTP.
         # np.maximum.at(cortex['post_synapse_max_increased_LTP'],
         #               cortex['post_ind'][is_STP_nerve_inds],
         #               cortex['increased_LTP'][is_STP_nerve_inds])
 
         # is_not_STP_nerve_inds = form_and_firm_nerve_inds[~is_STP_nerve_mask]
 
-        # # 突触后膜LTP的增量最大值
+        # # The maximum increment of synaptic membrane LTP.
         # np.maximum.at(cortex['post_synapse_max_increased_LTP'],
         #               cortex['post_ind'][is_not_STP_nerve_inds],
         #               cortex['increased_LTP'][is_not_STP_nerve_inds])
 
-        # 如果强化突触后，同一位point上存在一组或多组LTP完全一样的突触，将每组这样的突触的第一个突触的LTP加1，强制赋予它微弱的竞争优势
+        # If after strengthening the synapse, there is a group or multiple groups of synapses with the exact same LTP at the same point, add 1 to the LTP of the first synapse in each group, giving it a weak competitive advantage.
         max_LTP_on_each_post_nerve = cortex['float_util']
         posterior_synapse_inds = cortex['ind'][
             cortex_obj.get_posterior_synapse_slice()]
@@ -114,13 +114,13 @@ class FormNerve():
             cortex['LTP'][posterior_synapse_inds] ==
             max_LTP_on_each_post_nerve[cortex['post_ind']
                                        [posterior_synapse_inds]]]
-        # 存在质数冲突的突触不能+1
-        # 如果某个突触的marker_exinfo可以被自身soma的marker_exinfo整除1次以上，就说明该突触存在质数冲突
+        # Synapses that have conflicting prime numbers cannot be incremented by 1.
+        # If the marker_exinfo of a synapse can be divided by the marker_exinfo of its own soma more than once, it means that there is a prime number conflict at the synapse.
         max_LTP_posterior_synapse_inds = max_LTP_posterior_synapse_inds[(
             cortex['exinfo_0'][max_LTP_posterior_synapse_inds] % np.power(
                 cortex['exinfo_0'][cortex['soma_ind']
                                    [max_LTP_posterior_synapse_inds]], 2)) != 0]
-        # 只有存在多个相同的最大值，才给第一个最大值+1
+        # Only if there are multiple identical maximum values, the first maximum value will be incremented by 1.
         _, unique_inds, unique_counts = np.unique(
             cortex['post_ind'][max_LTP_posterior_synapse_inds],
             return_index=True,
@@ -133,7 +133,7 @@ class FormNerve():
 
         return new_nerve_slice, firmed_existed_nerve_inds
 
-    # 分配突触前资源给到强化或新增的突触
+    # Allocate presynaptic resources to strengthen or create new synapses.
     def add_LTP_with_form_and_firm_nerve_inds(self, cortex_obj,
                                               form_and_firm_nerve_inds,
                                               appear_or_disappear):
@@ -141,7 +141,7 @@ class FormNerve():
         cortex = cortex_obj.cortex
         form_and_firm_nerve_inds = np.asarray(form_and_firm_nerve_inds, int)
 
-        # 链路上已存在同类抽象细胞（质数冲突）的突触无法获得LTP增量
+        # Synapses that already have similar abstract cells (prime number conflict) on the link cannot obtain an increase in LTP.
         can_add_LTP_mask = (np.maximum(
             1, cortex['exinfo_0'][cortex['post_ind'][form_and_firm_nerve_inds]]
         ).astype(int) % cortex['exinfo_0'][
@@ -151,16 +151,16 @@ class FormNerve():
 
         nerve_LTPs = cortex['LTP'][form_and_firm_nerve_inds]
 
-        # 质数冲突的突触，在竞争突触前资源时，由于自身LTP为0，需要借用突触后对象的LTP，来提高竞争力
-        # 质数冲突的突触，要参与竞争，但是最后不会实际增加LTP
+        # Synapses of prime number conflicts, when competing for resources before the synaptic contest, need to borrow LTP from the postsynaptic object to increase their competitiveness due to their own LTP being 0.
+        # Synapses with prime number conflicts must participate in competition, but in the end they will not actually increase LTP.
         # nerve_LTPs[~can_add_LTP_mask] = cortex['LTP'][cortex['post_ind'][form_and_firm_nerve_inds[~can_add_LTP_mask]]]
         nerve_LTPs[~can_add_LTP_mask] = 1
-        # LTP低于HELP_COMPETITION_MIN_LTP的突触，在突触资源竞争时无法从自身的LTP的获得收益
+        # Synapses with LTP below HELP_COMPETITION_MIN_LTP cannot benefit from their own LTP in synaptic resource competition.
         HELP_COMPETITION_MIN_LTP = 50
         nerve_LTPs = np.maximum(
             1, np.round(nerve_LTPs / HELP_COMPETITION_MIN_LTP, 5))
 
-        # # 计算各突触对突触前资源的竞争力 = 突触后对象的marker_remain * 自身LTP * 所在链路的树突棘的活性
+        # # Translation: Calculate the competitive strength of each synapse for presynaptic resources = marker_remain of postsynaptic object * its own LTP * the activity of dendritic spines in the corresponding pathway.
         # synapse_competition_force = cortex['dopamine_remain'][
         #     cortex['post_ind'][form_and_firm_nerve_inds]] * nerve_LTPs
         # if appear_or_disappear == 'appear':
@@ -171,31 +171,31 @@ class FormNerve():
         # # / (
         # #     max_pre_synapse_LTP_on_post_synapse_nerve /
         # #     cortex['LTP'][form_and_firm_nerve_inds])
-        # ''' TODO 如果一个位point上已经存在较强的突触，对于其他突触来说，获得WTA的几率更小，应该把更多突触前资源分配
-        #     到对其他竞争更小的point位上，这对于每个细胞来说是更聪明的做法，整体而言也可以加快突触链路建立的速度
+        # ''' TODO If a point already has strong synapses, the probability of obtaining WTA for other synapses is smaller, so more synaptic resources should be allocated.
+        #     Moving to smaller point positions of competition is a smarter move for each cell, and overall it can also accelerate the speed of establishing synaptic connections.
         # '''
         # # / np.maximum(
         # #     np.power(
         # #         (max_pre_synapse_LTP_on_post_synapse_nerve -
         # #          cortex['LTP'][form_and_firm_nerve_inds]) *
         # #         (max_pre_synapse_LTP_on_post_synapse_nerve >
-        # #          100),  # 当有LTP大于100的相邻突触时，自身受到的增强LTP的阻力和最大LTP的差值成正比
+        # #          100),  # When there are adjacent synapses with LTP greater than 100, the resistance to the enhanced LTP and the difference with the maximum LTP received are directly proportional.
         # #         1 / 3),
         # #     1)
         # # synapse_competition_force = np.power(synapse_competition_force, 1.5)
         # synapse_competition_force = np.power(synapse_competition_force, 3)
 
-        # # 将突触后对象的dopamine_remain+自身的LTP传递给突触前细胞
+        # # Translate: transfer the dopamine_remain of the postsynaptic object + its own LTP to the presynaptic cell.
         # pre_synapse_source_competition_stress = cortex['float_util']
         # pre_synapse_source_competition_stress[:] = 0
         # np.add.at(
         #     pre_synapse_source_competition_stress,
-        #     # 竞争的是同一个细胞上的资源，所以需要指向soma_ind
+        #     # The competition is for resources on the same cell, so it needs to be directed towards soma_ind.
         #     cortex['soma_ind'][form_and_firm_nerve_inds],
         #     synapse_competition_force,
         # )
 
-        # 每个突触分配到的突触前资源=(自身LTP+突触后对象的dopamine_remain)占总的突触前竞争压力的比例*突触前资源的总量
+        # The synaptic resources allocated to each synapse = (its own LTP + dopamine_remain of the postsynaptic object) proportion of the total presynaptic competitive pressure * total amount of presynaptic resources
         # synapse_competition_force_ratio = synapse_competition_force / pre_synapse_source_competition_stress[
         #     cortex['soma_ind'][form_and_firm_nerve_inds]]
         # debug
@@ -215,7 +215,7 @@ class FormNerve():
                 1, MAX_ADD_LTP_VALUE /
                 max_add_LTP_value[cortex['post_ind'][form_and_firm_nerve_inds]]
             )
-        # 减少stp突触的增量，使稳定的stp突触在与稳定的易化突触竞争时处于下风，只能竞争过不稳定的易化突触
+        # Reduce the increment of STP synapses, so that stable STP synapses are at a disadvantage when competing with stable facilitation synapses, and can only outcompete unstable facilitation synapses.
         synapse_is_STP_mask = cortex['exinfo_1'][
             cortex['pre_ind'][form_and_firm_nerve_inds]] == SYNAPSE_TYPE['STP']
         add_LTP_ratio[cortex['post_ind'][form_and_firm_nerve_inds]
@@ -224,7 +224,7 @@ class FormNerve():
             form_and_firm_nerve_inds] += add_LTP_value * add_LTP_ratio[
                 cortex['post_ind'][form_and_firm_nerve_inds]]
 
-        # 最后将不能强化的突触的LTP强制置0
+        # Finally, the LTP of the synapses that cannot be strengthened will be forcibly set to 0.
         cortex['LTP'][form_and_firm_nerve_inds[~can_add_LTP_mask]] = 0
 
         cortex_obj.write_cortex('add_LTP')
@@ -236,22 +236,22 @@ class FormNerve():
             cortex_obj.cortex_static_nerve_slice.stop,
             cortex_obj.new_ind_start)
 
-        # float_util用于对突触计数
+        # Conduct a floating utility analysis.
         cortex['float_util'][all_dynamic_nerves_slice] = 0.
 
-        # 对突触前对象活跃的突触+1
+        # Translation: Synapse +1 for active pre-synaptic object
         cortex['bool_util'][:] = False
         cortex['bool_util'][mother_inds] = True
         cortex['float_util'][all_dynamic_nerves_slice][cortex['bool_util'][
             cortex['pre_ind'][all_dynamic_nerves_slice]] == True] += 1.
 
-        # 对突触后对象活跃的突触+1
+        # Translation: Synapse +1 for the active post-synaptic object
         cortex['bool_util'][:] = False
         cortex['bool_util'][father_inds] = True
         cortex['float_util'][all_dynamic_nerves_slice][cortex['bool_util'][
             cortex['post_ind'][all_dynamic_nerves_slice]] == True] += 1.
 
-        # 最终计数为2的突触是已存在的突触
+        # The final count of synapses with a final count of 2 is a pre-existing synapse.
         new_nerves_existed_inds = cortex['ind'][all_dynamic_nerves_slice][
             cortex['float_util'][all_dynamic_nerves_slice] == 2.]
         new_nerves_existed_inds = new_nerves_existed_inds[
@@ -295,7 +295,7 @@ class FormNerve():
         cortex = cortex_obj.cortex
         new_nerves_existed_inds = np.asarray(new_nerves_existed_inds)
 
-        # 只能强化没被强化过的突触
+        # The only enhancing unpotentiated synapses.
         can_be_firm_nerve_mask = cortex['is_synapse'][
             new_nerves_existed_inds] == 1
         new_nerves_existed_inds = new_nerves_existed_inds[
@@ -303,7 +303,7 @@ class FormNerve():
         mother_inds = mother_inds[can_be_firm_nerve_mask]
         father_inds = father_inds[can_be_firm_nerve_mask]
 
-        # 记录强化前的marker_remain，用于后续计算marker_remain的增量
+        # Record the marker_remain before the reinforcement, for future calculations of the increment of marker_remain.
         self.update_synapse_marker_remain(cortex_obj, new_nerves_existed_inds)
 
         if callable(new_nerve_callback):
@@ -315,7 +315,7 @@ class FormNerve():
                                     form_or_firm_nerve_inds):
         cortex = cortex_obj.cortex
 
-        # marker_exinfo1保存了每个突触指向的数字的ind
+        # marker_exinfo1 contains the index of each synapse targeted by a number.
         form_or_firm_LTP_values = LEARNING_RATE * cortex['marker_remain'][
             mother_inds] * (cortex['dopamine_remain'][
                 cortex['exinfo_1'][form_or_firm_nerve_inds].astype(int)])
@@ -382,7 +382,7 @@ class FormNerve():
             cortex[prop][new_nerve_inds] = cortex[prop][
                 mother_inds] if prop in inherit_props_from_mother else PART_PROPS_MATRIX[
                     prop][TYPE['axon_end']]
-        # 直接与父母源连接的突的pre_ind和post_ind为父母源的ind
+        # The pre-ind and post-ind of the synapse directly connected to the parent source are the ind of the parent source.
         cortex['pre_ind'][new_nerve_inds] = cortex['ind'][mother_inds]
         cortex['post_ind'][new_nerve_inds] = cortex['ind'][father_inds]
         cortex['mother_type'][new_nerve_inds] = cortex['type'][mother_inds]
@@ -421,10 +421,10 @@ class FormNerve():
             reset_nerve_props_lambda(cortex_obj, new_nerve_inds, mother_inds,
                                      father_inds)
 
-        # 根据算术基本定理，将突触前后细胞的marker_exinfo质数相乘，来累积这条链路上的所有突触的信息，进而避免建立循环回路
+        # According to the fundamental theorem of arithmetic, the product of the marker_exinfo primes of the presynaptic and postsynaptic cells is used to accumulate the information of all synapses on this pathway, thus avoiding the formation of a cycle loop.
         if is_posterior == 2:
-            ''' marker_exinfo只能在易化链路里累积，不能用于阻止建立stp突触
-                因此新建的STP突触，不能用突触前对象的marker_remain和突触后对象的marker_remain相乘，来作为自身的marker_remain
+            ''' marker_exinfo can only be accumulated in the easy linkage, it cannot be used to prevent the establishment of STP synapse.
+                Therefore, the newly established STP synapse cannot use the multiplication of the marker_remain of the presynaptic object and the marker_remain of the postsynaptic object as its own marker_remain.
             '''
             new_nerve_is_not_link_start_inds = new_nerve_inds[
                 cortex['exinfo_0'][cortex['pre_ind'][new_nerve_inds]] == 1]
@@ -464,7 +464,7 @@ class FormNerve():
                 *range(cortex_obj.new_ind_start, new_nerve_slice_stop),
             ])
         else:
-            # 父母有一方不存在（ind为0）时，他们的突触也不存在，ind也为0
+            # When one parent is absent (ind=0), their synapses also do not exist, and ind is also 0
             new_nerve_inds = np.zeros(len(mother_inds))
             new_nerve_inds[avaliable_parents_mask] = np.arange(
                 cortex_obj.new_ind_start,

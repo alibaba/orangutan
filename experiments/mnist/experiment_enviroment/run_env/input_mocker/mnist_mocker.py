@@ -46,7 +46,7 @@ class Mnist_mocker(Abstract_mocker):
             #     9: 2,
             # }[num]
             feature_sum = 5
-            # 注意力结果出现的帧数的间隔：结果1：9，后面都统一17
+            # Interval of frames in which attention results appeared: Result 1: 9, all subsequent ones are consistent at 17.
             return 9 + 17 * (feature_sum - 1)
 
         return [{
@@ -74,7 +74,7 @@ class Mnist_mocker(Abstract_mocker):
     def get_mnist_input_matrix(self, mnist_name):
         INPUT_FOLDER_NAME = 'd28_mnist/' if '/' not in mnist_name else ''
         I = Image.open(f'{IMG_PATH}/input/{INPUT_FOLDER_NAME}{mnist_name}.bmp')
-        L = I.convert('L')  # 转化为灰度图
+        L = I.convert('L')  # Convert to grayscale image
         mnist_input_matrix = np.asarray(L, np.int32) / 255 * PIXEL_MAX_EXCITE
 
         return mnist_input_matrix

@@ -49,7 +49,7 @@ class Controller(Abstract_controller):
     def on_cortex_cycle_end(self):
         global attention_result_ind_on_cortex_start
 
-        # 如果注意力竞争后有两个相同兴奋的赢家细胞，强制只保留其中一个
+        # If there are two identical excited winner cells after attention competition, only one of them is forcibly retained.
         if sum(self.cortex_obj.cortex['excite'][attention_result_inds] > 0
                ) > 1:
             max_excite_ind = attention_result_inds[np.argmax(
@@ -67,9 +67,9 @@ class Controller(Abstract_controller):
                 self.cortex_obj.cortex['excite'][attention_result_inds] > 0
         ) > 0 and attention_result_ind != attention_result_ind_on_cortex_start:
 
-            # 在转移到下一个特征前，才记录当前特征的位置
+            # Before moving on to the next feature, record the position of the current feature.
             if self.attention_feature_count > 0:
-                # 记录当前特征位置，用于mock锚point特征位置
+                # Record the current feature position for mocking anchor point feature position.
                 self.anchor_feature_pos_excites = self.record_anchor_feature_pos_excites
 
             self.cortex_obj.write_cortex('attention_result')

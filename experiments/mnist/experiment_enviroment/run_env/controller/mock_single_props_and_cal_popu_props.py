@@ -49,16 +49,16 @@
 #     def get_active_num(self):
 #         return int(self.mock_props.nowa_feature_name.split('_')[0])
 
-#     def mock_数字(self):
+#     def mock_num(self):
 #         cortex_obj = self.cortex_obj
 #         cortex = cortex_obj.cortex
 #         get_soma_inds = self.get_soma_inds
 #         num_input = self.get_active_num()
 #         # if num_input == None or num_input < 0: return
 
-#         inds_数字 = get_soma_inds('数字', 'input', num_input)
-#         cortex['excite'][inds_数字] = NUM_EXCITE
+#         inds_num = get_soma_inds('num', 'input', num_input)
+#         cortex['excite'][inds_num] = NUM_EXCITE
 
-#         # cortex_obj.vary_soma_inds.update(inds_数字)
+#         # cortex_obj.vary_soma_inds.update(inds_num)
 
-#         return inds_数字
+#         return inds_num

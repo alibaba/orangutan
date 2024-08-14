@@ -3,14 +3,14 @@ import numpy as np
 from .feature import COMMON_ABSTRACT_NAMES_WITH_ABSTRACT_TYPES, ABSTRACT_EXCITE
 import math
 
-# 电位
+# potential
 SRP = soma_rest_potential = -65
 NRP = nerve_rest_potential = -65
 ATP = active_threshold_potential = 0
 
 PIXEL_MAX_EXCITE = 255 * -SRP
 
-# 学习速率：希望当前链路重复 1 / LEARNING_RATE 次后，才让它的强度达到目标数值，以证明这条链路的稳定性
+# Learning Rate: Hopes to prove the stability of this link by only allowing its strength to reach the target value after being repeated 1/LEARNING_RATE times.
 LEARNING_RATE = .3
 WEAKEN_AXON_END_LTP_PER_TICK = 50.
 DIED_LTP_THRESHOLD = 1.

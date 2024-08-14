@@ -114,68 +114,7 @@ export default {
       canRenderLayoutContent: true,
       grayMatrixInd: 0,
       // saccadeDataList,
-      saccadeDataList: mixupSaccadeDataList([
-        // 问题：注意到anglepoint处尺度为1的innercontour_center
-        // 案例：'1_2','1_6','3_1','3_6','4_1','4_2','4_3','4_8','6_4','6_9','7_4','7_8','8_1','8_9','9_2','9_3','9_6','9_9',
-        // 原因：anglepoint处存在大量尺度为1的inner轮廓直线，对尺度为1的innercontour_center形成较大激励
-        // 思路：区分anglepoint处的innercontour_center和非anglepoint处的contour_center，anglepoint处存在射线，非anglepoint处不存在射线
-        // 解法：用anglepoint处的射线来抑制anglepoint处的innercontour_center
-        // saccadeDataList0311,
-        // 问题：为了解决anglepoint问题，导致部分尺度较小（s3~s7）的innercontour_center没有被注意到
-        // 案例：'2_5','3_8','6_6','6_7','6_9','8_0','8_1','8_2','8_5','8_7','9_0','9_7','9_8',
-        // 原因：尺度较小的innercontour_center附近处容易存在边缘point，导致该位置上的射线细胞被这些边缘point激活，进而抑制innercontour_center
-        // 思路：区分anglepoint处的innercontour_center和非anglepoint处的contour_center，anglepoint处存在射线，非anglepoint处不存在射线
-        // 解法：用更大尺度的inner轮廓orientation来抑制这些射线
-        // saccadeDataList0313,
-        // 问题：在尝试用更大尺度的inner轮廓orientation来抑制位于inner轮廓的射线后，发现部分射线无法被有效抑制，导致注意到特征angle
-        // 案例：'2_5','8_1'
-        // 原因：
-        //   1. 射线的起point位于某个像素point上，后者产生了一个边缘point，进而在该处激活了尺度为1的外轮廓orientation，抑制住了该位置上的inner轮廓orientation，导致无法有效抑制射线（2_5）
-        //   2. 向inner的轻微曲线会导致射线末端的垂直orientation和inner轮廓orientation都不显著，对射线的抑制作用较小（8_1）
-        // 解法：用末端上的像素point来抑制射线，作为对末端上的inner轮廓orientation和垂直orientation的补充
-        // saccadeDataList0314,
-        // 问题：部分case下的angle没有注意到
-        // 案例：'3_3','8_9', | '5_9',
-        // 原因：用末端上的像素point来抑制射线，可能会将正常的微曲射线也抑制住
-        // 思路：还是需要用inner轮廓orientation来抑制，但是单个边缘point的兴奋可能不够大，导致用于抑制射线的inner轮廓orientation作用有限
-        // 解法：改用求和orientation来抑制射线
-        // saccadeDataList0315,
-        // 问题：又发现部分case中存在注意到inner轮廓中的angle的问题
-        // 案例：'2_3','2_5','4_4','6_9','7_7','9_7',
-        // saccadeDataList0317,
-        // 问题：9_6没有注意到左下的angle
-        // 案例：'9_6','8_9','7_9','4_5',
-        // 原因：9_6，因为COri^{o=270,s=1}兴奋过小，导致CRay^{o=270,s=5}被拮抗回路过度抑制，进而导致CAng^{o1=180,o2=270}兴奋过小
-        // 解法：
-        //  1. 9_6，适当减少拮抗回路的抑制作用
-        //  2. 增加尺度对于angle的增益
-        // saccadeDataList0318,
-        // 问题：关注到不符合预期的angle
-        // 案例：'9_0','4_7','3_7','3_4','3_6','2_4',
-        // 原因：过度增益了尺度
-        // 解法：适当降低尺度增益
-        // saccadeDataList0319,
-        // 7_7里那么大尺度的一个angle居然没被注意到
-        // 原因：之前prohibit_了对21尺度的射线的感知，导致这个angle直接被干掉了。。。
-        // 解法：尝试unprohibited_21
-
-        // 问题：一些开口的小尺度inner轮廓还是会被射线抑制，因为在开口处不存在innercontour_center，无法有效抑制射线
-        // 案例：'4_5','3_7','3_4','3_3','2_4','2_2','2_0',
-        // 解法：改成让射线只针对尺度为1的inner轮廓orientation进行抑制
-        // saccadeDataList0320,
-        // saccadeDataList0320_1,
-        // 基本上只剩下了一些小问题或可以被解释的问题
-        // 9_9 9_6 6_9 4_5 3_4 2_5
-        // saccadeDataList0321,
-        // saccadeDataList0324,
-        // 问题：发现大量注意到感受野存在交集的特征
-        // 案例：'7_8','7_3','7_2','7_1','7_0','6_8','5_7','4_5','2_4','2_3','2_0','1_9','1_8','1_7','1_6','1_3','1_1','1_0','0_9','0_2',
-        // 原因：看下来基本都是inner轮廓的反馈问题
-        // saccadeDataList0325,
-        // saccadeDataList0326,
-        // saccadeDataList0327,
-        saccadeDataList0327ForPaper,
-      ]),
+      saccadeDataList: mixupSaccadeDataList([saccadeDataList0327ForPaper]),
       saccadeDataMap: {},
       backPropagationBase64Map: [],
     };
@@ -183,20 +122,15 @@ export default {
   computed: {
     saccadePathList() {
       function extractXY(str = "") {
-        // 正则表达式用于匹配 y= 和 x= 后面的数字
         const regex = /y=(\d+),x=(\d+)/;
-        // 使用正则表达式提取匹配的值
         const match = str.match(regex);
 
         if (match) {
-          // match[1] 是第一个捕获组 (y对应的数字)，match[2] 是第二个捕获组 (x对应的数字)
           return {
             y: parseInt(match[1], 10),
             x: parseInt(match[2], 10),
           };
         }
-
-        // 如果没有匹配到，返回null或者其他表示错误的值
         return null;
       }
 
@@ -269,7 +203,7 @@ export default {
                   },
                 },
               }[featureList[posInd]],
-              // 箭头
+              // arrow
               ...(posInd === posList.length - 1
                 ? []
                 : [
@@ -419,12 +353,11 @@ export default {
                 new Function()
               )()}
 
-            {/* 图表tooltip */}
+            {/* tooltip */}
             {this.renderChartTooltip()}
 
             {this.renderSaccadePathway()}
 
-            {/* 灰度图预览 */}
             {this.renderGrayMatrixPreviewWithMapData()}
             {/* {this.renderGrayMatrixPreviewWithListData()} */}
             {/* {this.renderMultiFieldGrayMatrixPreviewWithMapData()} */}
@@ -469,7 +402,6 @@ export default {
                 },
                 false
               );
-              // 布局改变时需要触发图表重绘
               setTimeout(this.redrawLayoutContent, 200);
             }}
           />
@@ -492,18 +424,13 @@ export default {
         );
       });
 
-      // 生成ZIP文件并触发下载
       zip.generateAsync({ type: "blob" }).then(function (content) {
-        // 创建一个临时链接元素
         var link = document.createElement("a");
 
-        // 使用window.URL.createObjectURL()创建blob的URL
         link.href = window.URL.createObjectURL(content);
 
-        // 设置下载attribute及文件名
         link.download = `${folderName}.zip`;
 
-        // 触发下载动作
         link.click();
       });
     },
@@ -637,12 +564,11 @@ export default {
               });
             }}
           >
-            保存感受野图片
+            save receptive field pic
           </Button>
         </div>
       );
     },
-    // 叠加感受野
     renderMultiFieldGrayMatrixPreviewWithMapData() {
       const orient = "45.0";
       const scale = "13";
@@ -731,7 +657,7 @@ export default {
               });
             }}
           >
-            保存叠加感受野图片
+          	save multi receptive field pic
           </Button>
         </div>
       );
@@ -779,7 +705,7 @@ export default {
             ))}
           </div>
           <div style={{ textAlign: "center", margin: "-20px 0 20px 0" }}>
-            尺度：{data.length}
+            scale：{data.length}
             <Button
               type={"primary"}
               style={{ width: "100%" }}
@@ -798,7 +724,7 @@ export default {
                 });
               }}
             >
-              保存图片
+              save pic
             </Button>
           </div>
           <Slider
@@ -919,7 +845,6 @@ export default {
         /* const minChartDataValue = Math.min(...chartDatas); */
       }
       const minChartDataValue = -65;
-      // 让数值最小的柱，也能在图表上露出来一point，便于观察
       const zeroOffset = Math.max(10 - minChartDataValue);
       {
         /* const zeroOffset = 0; */
@@ -929,14 +854,13 @@ export default {
 
       return (
         <Layout.Content>
-          {/* 图表 */}
           <Layout
             style={{
               width: "100%",
               height: "100%",
             }}
           >
-            {/* 图表y轴 */}
+            {/* y axis */}
             <Layout.Sider
               style={{
                 maxWidth: "fit-content",
@@ -946,15 +870,12 @@ export default {
               }}
             ></Layout.Sider>
             <Layout>
-              {/* 图表主体 */}
               <Layout.Content>
-                {/* 图表inner容 */}
                 <div
                   class="bar-box"
                   id="barChartContent"
                   style={{ border: 0, padding: 0 }}
                 >
-                  {/* 图表柱 */}
                   {chartDatas.map((chartData, chartDataInd) => {
                     return (
                       <div
@@ -1037,7 +958,7 @@ export default {
                   })}
                 </div>
               </Layout.Content>
-              {/* 图表x轴 */}
+              {/* x axis */}
               <Layout.Footer
                 style={{
                   maxHeight: "fit-content",
@@ -1096,7 +1017,6 @@ export default {
               position: "relative",
             }}
           >
-            {/**矩阵列表 */}
             <Layout.Content>
               <div
                 id="matrixList"
@@ -1131,9 +1051,6 @@ export default {
                       chartDatasSort.indexOf(chartData)
                     );
 
-                    {
-                      /** 单个矩阵 */
-                    }
                     return (
                       <div
                         style={{
@@ -1192,13 +1109,10 @@ export default {
                               parseInt(chartDataInd / pixelWHSum) + 1
                             },x=${(chartDataInd % pixelWHSum) + 1}`;
 
-                            // 正则表达式，匹配整数和小数
                             const regex = /-?\d+(\.\d+)?/g;
-                            // 使用 match 方法来提取匹配的数字字符串
                             const matches = (
                               searchNerveNames[chartDataInd] || ""
                             ).match(regex);
-                            // 将匹配的字符数组转换为数字数组
                             const numbers = matches ? matches.map(Number) : [];
 
                             const getTooltipExtinfo = (chartDataInd) => ({
@@ -1229,7 +1143,6 @@ export default {
 
                             const [tickName, writeStageName, mnist] =
                               this.options.readFileName.split(";");
-                            // TODO: 这个逻辑容易导致inner存溢出 需要优化
                             {
                               /* if (
                               writeStageName === "attention_result" &&
@@ -1316,7 +1229,7 @@ export default {
                                   await navigator.clipboard.writeText(
                                     tooltipContent.latex
                                   );
-                                  window.message.success("inner容已复制");
+                                  window.message.success("content copied");
                                 }}
                               >
                                 <div
@@ -1360,9 +1273,7 @@ export default {
                 )}
               </div>
             </Layout.Content>
-            {/* 侧边栏 */}
             <Layout.Sider>
-              {/* 视图列表 */}
               <Space
                 direction="vertical"
                 style={{
@@ -1382,7 +1293,6 @@ export default {
                       bordered={true}
                       key={0}
                     >
-                      {/* 按钮组 */}
                       <List.Item style={{ padding: 0 }}>
                         <Button.Group
                           style={{
@@ -1422,7 +1332,7 @@ export default {
                               width: "100%",
                               borderWidth: "0 1px 0 1px",
                             }}
-                            title="确认删除"
+                            title="confirm"
                             disabled={
                               contentInfo.name === searchNerveExpressionName
                             }
@@ -1524,7 +1434,6 @@ export default {
                           />
                         </Button.Group>
                       </List.Item>
-                      {/* 名称 */}
                       <List.Item style={{ padding: 0 }}>
                         <Select
                           value={contentInfo.name}
@@ -1564,11 +1473,10 @@ export default {
                           )}
                         </Select>
                       </List.Item>
-                      {/**输入框组 */}
                       <List.Item style={{ padding: 0 }}>
                         <Input.Group compact style={{ display: "flex" }}>
                           <Input
-                            placeholder="缩进"
+                            placeholder="intent"
                             style={{ borderWidth: "0 1px 0 0px" }}
                             value={
                               (chartSetting.contentInfoOffsets || [])[
@@ -1577,7 +1485,6 @@ export default {
                             }
                             size="small"
                             onChange={(e) => {
-                              // 希望缩进不和具体inner容绑定，而是和列表索引绑定，所以用一个单独array维护
                               chartSetting.contentInfoOffsets =
                                 chartSetting.contentInfoOffsets || [];
                               chartSetting.contentInfoOffsets[contentInfoInd] =
@@ -1595,7 +1502,7 @@ export default {
                             }}
                           />
                           <Input
-                            placeholder="缩放"
+                            placeholder="scale"
                             style={{
                               borderWidth: "0 0 0 1px",
                               borderRadius: 0,
@@ -1704,7 +1611,6 @@ export default {
                           />
                         </Input.Group>
                       </List.Item>
-                      {/* 高亮滑块 */}
                       <List.Item>
                         <Slider
                           style={{ width: "100%", margin: "-2px" }}
@@ -1754,7 +1660,7 @@ export default {
                     });
                   }}
                 >
-                  保存矩阵图片
+                  save matrix pic
                 </Button>
               </Space>
             </Layout.Sider>
@@ -1867,7 +1773,7 @@ export default {
                 });
             }}
           >
-            保存路径图片
+          save path pic
           </Button>
         </div>
       );
@@ -1913,7 +1819,6 @@ export default {
                 }, false)
               }}
             /> */}
-            {/* 选择展示attribute */}
             <Radio.Group
               size="small"
               button-style="solid"
@@ -1933,7 +1838,6 @@ export default {
               ))}
             </Radio.Group>
           </Layout.Header>
-          {/* 图表主体 */}
           {/* {this.renderBarChartContent(
             chartDatas,
             (chartDataInd) => {
@@ -1994,7 +1898,6 @@ export default {
                 class="layout-header-icon layout-header-icon-close"
               />
             </div>
-            {/* 选择展示attribute */}
             {radioOrCheckbox === "radio" ? (
               <div
                 style={{
@@ -2063,7 +1966,6 @@ export default {
                 ></Checkbox.Group>
               </div>
             )}
-            {/* 单选/多选 */}
             <Radio.Group
               size="small"
               button-style="solid"
@@ -2085,10 +1987,9 @@ export default {
                 );
               }}
             >
-              <Radio.Button value="radio">单</Radio.Button>
-              <Radio.Button value="checkbox">多</Radio.Button>
+              <Radio.Button value="radio">single</Radio.Button>
+              <Radio.Button value="checkbox">multi</Radio.Button>
             </Radio.Group>
-            {/* 选择展示形式 */}
             <Radio.Group
               size="small"
               button-style="solid"
@@ -2109,8 +2010,8 @@ export default {
                 );
               }}
             >
-              <Radio.Button value="bar">柱</Radio.Button>
-              <Radio.Button value="image">图</Radio.Button>
+              <Radio.Button value="bar">column</Radio.Button>
+              <Radio.Button value="image">graph</Radio.Button>
             </Radio.Group>
             {chartContentType === "bar" && (
               <Button
@@ -2133,7 +2034,7 @@ export default {
                   });
                 }}
               >
-                保存柱状图
+                save column pic
               </Button>
             )}
             {this.readFileName.split(";")[1] === "back_propagation_to_dot" && (
@@ -2169,12 +2070,10 @@ export default {
                   });
                 }}
               >
-                批量保存反向传播图
+              	batch save bp pic
               </Button>
             )}
           </Layout.Header>
-          {/* 图表主体 */}
-          {/* 柱状图 */}
           {chartContentType == "bar" &&
             this.renderBarChartContent(
               chartDatas,
@@ -2202,7 +2101,6 @@ export default {
                   : this.updatePinnedSomaOrNerveInds([nerveInd], somaOrNerve);
               }
             )}
-          {/* 图片 */}
           {chartContentType === "image" &&
             this.renderMatrixImage(allPropNames, showPropName)}
         </Layout>
@@ -2225,7 +2123,7 @@ export default {
             }
             labelCol={{}}
           >
-            <Form.Item label="胞体attribute">
+            <Form.Item label="soma attribute">
               {this.renderSelector({
                 options: this.allProps,
                 value: this.options.showSomaProps,
@@ -2239,7 +2137,7 @@ export default {
                 },
               })}
             </Form.Item>
-            <Form.Item label="神经突attribute">
+            <Form.Item label="nerve attribute">
               {this.renderSelector({
                 options: this.allProps,
                 value: this.options.showNerveProps,
@@ -2252,7 +2150,7 @@ export default {
                   ),
               })}
             </Form.Item>
-            <Form.Item label="时间节point过滤">
+            <Form.Item label="time node filter">
               {this.renderSelector({
                 options: [
                   ...new Set(
@@ -2270,7 +2168,7 @@ export default {
                 },
               })}
               <Input
-                addonBefore="正则"
+                addonBefore="reg"
                 size="small"
                 value={this.options.historyFileNamesRegStr}
                 onPressEnter={(e) => {
@@ -2283,7 +2181,7 @@ export default {
                 }}
               />
             </Form.Item>
-            <Form.Item label="钉住的胞体">
+            <Form.Item label="pinned soma">
               <Space direction="vertical" style={{ width: "100%" }}>
                 {this.renderPinnedList(
                   "soma",
@@ -2312,8 +2210,8 @@ export default {
                 </Radio.Group>
                 <Switch
                   checked={this.options.isShowPinnedSomaCircuit}
-                  checkedChildren="只展示钉住的胞体的神经回路"
-                  unCheckedChildren="只展示钉住的胞体的神经回路"
+                  checkedChildren="Showing only the neural circuitry of the pinned cell bodies"
+                  unCheckedChildren="Display only the neural circuitry of the pinned cell body"
                   style={{ width: "100%" }}
                   onClick={() =>
                     this.updateOptions({
@@ -2327,8 +2225,8 @@ export default {
                     this.options.layoutContentSet.slice(-1)[0] ===
                     LAYOUT_CONTENT_NAMES.circuitTreePanel
                   }
-                  checkedChildren="展示钉住的胞体的神经回路树状图"
-                  unCheckedChildren="展示钉住的胞体的神经回路树状图"
+                  checkedChildren="Display a neural circuit dendrogram showing pinned cell bodies"
+                  unCheckedChildren="Show a neural circuit dendrogram of pinned cells"
                   style={{ width: "100%" }}
                   onClick={(checked) => {
                     this.updateLayoutContentSet(
@@ -2339,7 +2237,7 @@ export default {
                 />
               </Space>
             </Form.Item>
-            <Form.Item label="钉住的神经突">
+            <Form.Item label="pinned nerve">
               <Space direction="vertical" style={{ width: "100%" }}>
                 {this.renderPinnedList(
                   "nerve",
@@ -2354,8 +2252,8 @@ export default {
                 )}
                 <Switch
                   checked={this.options.isOnlyShowPinnedNerves}
-                  checkedChildren="只展示钉住的神经突"
-                  unCheckedChildren="展示所有的神经突"
+                  checkedChildren="only show pinned nerve"
+                  unCheckedChildren="show all nerve"
                   style={{ width: "100%" }}
                   onClick={() =>
                     this.updateOptions({
@@ -2368,8 +2266,6 @@ export default {
             </Form.Item>
             {/* <Form.Item>
               <Input
-                addonBefore="只展示LTP大于"
-                addonAfter="的突触"
                 style={{
                   width: "100%",
                   textAlign: 'center'
@@ -2390,7 +2286,7 @@ export default {
               }}>
                 <Input
                   style="border-right: 0; pointer-events: none; background-color: #fff;color:#000;"
-                  placeholder="回路长度"
+                  placeholder="circuit len"
                   disabled
                 />
                 <Input
@@ -2426,8 +2322,8 @@ export default {
             </Form.Item> */}
             {/* <Form.Item>
               <Input
-                addonBefore="只展示前"
-                addonAfter="个最强的突触"
+                addonBefore="only show fist"
+                addonAfter="strongest synapse"
                 value={this.options.onlyShowTopNSynapses}
                 style={{
                   textAlign: 'center',
@@ -2453,7 +2349,7 @@ export default {
                 }}
               >
                 <Radio.Button value="disabled" disabled style={{}}>
-                  布局尺寸
+                  layout size
                 </Radio.Button>
                 <Radio.Button
                   value="normal"
@@ -2462,7 +2358,7 @@ export default {
                     flex: 1,
                   }}
                 >
-                  标准
+                normal
                 </Radio.Button>
                 <Radio.Button
                   value="small"
@@ -2471,7 +2367,7 @@ export default {
                     flex: 1,
                   }}
                 >
-                  小
+                  small
                 </Radio.Button>
                 <Radio.Button
                   value="extreme_small"
@@ -2480,7 +2376,7 @@ export default {
                     flex: 1,
                   }}
                 >
-                  极小
+                  xm
                 </Radio.Button>
               </Radio.Group>
             </Form.Item>
@@ -2951,7 +2847,7 @@ export default {
       };
       return (
         <Input
-          placeholder="正则过滤"
+          placeholder="reg filter"
           allowClear
           value={this.options.regionHighlightNeuronRegExp[region_name]}
           onPressEnter={onPressEnter}
@@ -2974,7 +2870,7 @@ export default {
           <Form.Item label="脑区尺寸">
             <Input.Group style={{ width: "100%" }} compact>
               <InputNumber
-                placeholder="行数"
+                placeholder="row no"
                 style={{ width: `${(1 / 3) * 100}%` }}
                 value={raw_region_json["region_shape"][0]}
                 onChange={(val) => {
@@ -2983,7 +2879,7 @@ export default {
                 }}
               />
               <InputNumber
-                placeholder="超柱数"
+                placeholder="hyper col no"
                 value={raw_region_json["region_shape"][1]}
                 style={{ width: `${(1 / 3) * 100}%` }}
                 onChange={(val) => {
@@ -2992,7 +2888,7 @@ export default {
                 }}
               />
               <InputNumber
-                placeholder="微柱数"
+                placeholder="mini col no"
                 value={raw_region_json["region_shape"][2]}
                 style={{ width: `${(1 / 3) * 100}%` }}
                 onChange={(val) => {
@@ -3051,13 +2947,13 @@ export default {
                 this.deletePinnedInd("all", pinnedType);
               }}
             >
-              清空
+            clear
             </List.Item>
           ) : (
             ""
           )}
           <Input
-            placeholder="添加"
+            placeholder="add"
             value={this.manuallyAddPinnedSomaOrNervesStr}
             style={{
               borderWidth: 0,
@@ -3119,7 +3015,7 @@ export default {
           {
             <Input
               class="timeline-search"
-              placeholder="正则搜索"
+              placeholder="reg search"
               onPressEnter={(e) => {
                 const searchReg = RegExp(
                   `^${this.exchangeRegExp(e.target.value)}`
@@ -3207,7 +3103,6 @@ export default {
         allNerveInds.push(nerveInd);
 
         const nerveData = allNerveMap[nerveInd] || {};
-        // type===2的是axon_end或synapse
         const isSynapse = [
           nerveType.axon_end,
           nerveType.spine_connect,
@@ -3253,7 +3148,6 @@ export default {
               })}
               <Tag
                 onClick={() => {
-                  // 查看叶子节point的柱状图
                   // this.nerveLeafsChartData = nextLeafNerveDatas;
                   this.updateOptions(
                     {
@@ -3308,10 +3202,10 @@ export default {
                 await navigator.clipboard.writeText(
                   JSON.stringify(allNerveInds)
                 );
-                window.message.success("inner容已复制");
+                window.message.success("content has been copied");
               }}
             >
-              复制所有ind
+              copy all inds
             </Button>
           </Layout.Header>
           <Layout.Content>
@@ -3410,7 +3304,6 @@ export default {
 
 <style lang="less">
 body {
-  // 阻止抽屉组件对body样式的重写
   overflow: visible !important;
 }
 

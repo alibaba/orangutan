@@ -194,7 +194,7 @@ class RenderCortex():
             pos_matrix['y'][can_render_neuron_inds] += np.tile(
                 render_neuron_ind,
                 region['mini_col_sum_in_region']) * self.neuron_space_y
-            ''' 把不要渲染的神经元的坐标直接设置到视窗之外，就可以间接实现渲染过滤 '''
+            ''' By setting the coordinates of the neurons that do not need to be rendered directly outside the viewport, rendering filtering can be indirectly implemented. '''
             pos_matrix['y'][this_region_neuron_inds[tuple([
                 np.tile(~can_render_neuron_mask,
                         region['mini_col_sum_in_region'])
@@ -236,20 +236,20 @@ class RenderCortex():
                                           father_is_static_part_mask):
         cortex = self.write_n_read_cortex.cortex
 
-        # 突触前细胞的位置作为起point
+        # The location of the presynaptic cell serves as the starting point.
         mother_inds = cortex['pre_ind'][nerve_inds]
         mother_pos = self.get_static_part_pos_with_inds(mother_inds)
         pos_matrix['from_x'][:] = mother_pos['x']
         pos_matrix['from_y'][:] = mother_pos['y']
 
-        # 突触后细胞的位置作为终point
+        # The position of the postsynaptic cell serves as the endpoint.
         soma_father_inds = cortex['post_ind'][nerve_inds][
             father_is_static_part_mask].astype(int)
         soma_father_pos = self.get_static_part_pos_with_inds(soma_father_inds)
         pos_matrix['to_x'][father_is_static_part_mask] = soma_father_pos['x']
         pos_matrix['to_y'][father_is_static_part_mask] = soma_father_pos['y']
 
-        # 突触后突触的位置作为终point
+        # The location of the postsynaptic membrane serves as the endpoint.
         father_is_axon_end_mask = np.isin(
             cortex['father_type'][nerve_inds],
             [TYPE['axon_end'], TYPE['spine_connect']])
@@ -302,7 +302,7 @@ class RenderCortex():
         pinnedSomaShowMaxCircuitLengthMap = options.get(
             'pinnedSomaShowMaxCircuitLengthMap', {})
 
-        # ind等同于id
+        # ind equals to id
         pinned_soma_inds = options.get('pinnedSomaInds', [])
         pinned_nerve_inds = options.get('pinnedNerveInds', [])
         if len(pinned_nerve_inds) and options.get('isOnlyShowPinnedNerves'):
@@ -347,7 +347,7 @@ class RenderCortex():
         #         tuple(can_render_nerve_inds_list)).astype(int) if len(
         #             can_render_nerve_inds_list) else np.asarray([], int)
 
-        #     # 只渲染LTP为topN的突触
+        #     # Translate: Only render synapses with LTP as top N.
         #     cannot_render_nerve_inds = can_render_nerve_inds
         #     for i in range(only_show_top_n_synapses):
         #         cortex['float_util'][:] = 0
@@ -359,12 +359,12 @@ class RenderCortex():
         #                 cortex['LTP'][can_render_nerve_inds] <
         #                 cortex['float_util'][cortex['post_ind']
         #                                      [can_render_nerve_inds]]]
-        #     # 先拿到是自己突触后对象topN的突触
+        #     # First, get the synapse after oneself for the topN synapses of the postsynaptic object.
         #     can_render_nerve_inds = can_render_nerve_inds[(
         #         cortex['LTP'][can_render_nerve_inds] >=
         #         cortex['float_util'][cortex['post_ind'][can_render_nerve_inds]]
         #     )]
-        #     # 得到完整的回路
+        #     # Get the complete circuit.
         #     cortex['bool_util'][:] = False
         #     cortex['bool_util'][pinned_inds] = True
         #     cortex['bool_util'][can_render_nerve_inds] = True
@@ -372,20 +372,20 @@ class RenderCortex():
         #         post_nerve_can_render_mask = cortex['bool_util'][
         #             cortex['post_ind'][can_render_nerve_inds]]
 
-        #         # 当所有nerve_ind的突触后对象都可被渲染时，结束循环
+        #         # When all post-synaptic objects of nerve_ind can be rendered, end the loop.
         #         if post_nerve_can_render_mask.all():
         #             break
         #         else:
-        #             # 将突触后对象不可渲染的nerve，标记为false
+        #             # Mark the neurons where postsynaptic objects are not rendered as false.
         #             cortex['bool_util'][can_render_nerve_inds[
         #                 ~post_nerve_can_render_mask]] = False
 
-        #             # 留下突触后对象可渲染的nerve
+        #             # Leave a nerve that can be rendered after the synapse.
         #             can_render_nerve_inds = can_render_nerve_inds[
         #                 post_nerve_can_render_mask]
 
         # else:
-        # 计算回路长度，并将每个回路的长度赋值给上面的每个突触
+        # Calculate the length of the circuit and assign the length of each circuit to each synapse above.
         cortex['int_util'][:] = 0
         for can_render_nerve_inds_ind, can_render_nerve_inds in enumerate(
                 can_render_nerve_inds_list):
@@ -400,7 +400,7 @@ class RenderCortex():
             tuple(can_render_nerve_inds_list)).astype(int) if len(
                 can_render_nerve_inds_list) else np.asarray([], int)
 
-        # # 过滤掉长度过低的回路
+        # # Filter out circuits with a length too short
         # min_circuit_length = int(
         #     self.frontend_options.get('minCircuitLength', 0))
         # if min_circuit_length > 0:
@@ -408,7 +408,7 @@ class RenderCortex():
         #         cortex['int_util'][can_render_nerve_inds] >=
         #         min_circuit_length]
 
-        # # 过滤掉长度过大的回路
+        # # Filter out loops with excessively large lengths.
         # max_circuit_length = int(
         #     self.frontend_options.get('maxCircuitLength', 0))
         # if max_circuit_length > 0:
@@ -416,17 +416,17 @@ class RenderCortex():
         #         cortex['int_util'][can_render_nerve_inds] <=
         #         max_circuit_length]
 
-        # # 过滤掉LTP过低的突触
+        # # Filter out synapses with low LTP.
         # can_render_nerve_inds = can_render_nerve_inds[
         #     cortex['LTP'][can_render_nerve_inds] >= (
         #         int(self.frontend_options.get('minLTPThreshold', 1)) or 1)]
 
-        # 过滤重复的ind
+        # Filter out duplicate ind
         unique_nerve_inds = np.unique(cortex['ind'][can_render_nerve_inds],
                                       return_index=True)[1]
         can_render_nerve_inds = can_render_nerve_inds[unique_nerve_inds]
 
-        # # 过滤掉在这帧之后才新建的突触
+        # # Filter out the synapses that are newly created after this frame.
         # if CORTEX_OPTS['enable_posterior_form'] == 1:
         #     can_render_nerve_inds = can_render_nerve_inds[
         #         cortex['synapse_form_tick'][can_render_nerve_inds] <=
@@ -437,10 +437,10 @@ class RenderCortex():
     def add_nerve_circuit_length(self, cortex, can_render_nerve_inds,
                                  circuit_length):
 
-        # 自身+circuit_length
+        # Self+circuit_length
         cortex['int_util'][can_render_nerve_inds] += circuit_length
 
-        # 给它下游的所有nerve都+1，circuit_length需要置为1
+        # Increase all downstream nerves of it by +1, and set circuit_length to 1.
         father_inds = cortex['post_ind'][can_render_nerve_inds]
         father_inds = father_inds[cortex['type'][father_inds] ==
                                   TYPE['axon_end']]
@@ -507,7 +507,7 @@ class RenderCortex():
             return []
 
         if debug:
-            ''' 返回inner容太多，针对要观察的inner容做下特殊的过滤逻辑
+            ''' Translation: There is too much inner content, so special filtering logic needs to be applied to the inner content that needs to be observed.
             '''
             parent_axon_end_ind = parent_axon_end_ind[np.logical_or(
                 (cortex['type'][parent_axon_end_ind] == TYPE['axon_end']) *

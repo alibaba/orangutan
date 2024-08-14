@@ -331,10 +331,10 @@ export default {
     getNerveColor(data) {
       const { nerveType, getPartProp } = this;
       return {
-        [`${nerveType.axon}`]: "red", // 轴突
-        [`${nerveType.axonEnd}`]: "orange", // 轴突末端
-        [`${nerveType.dendrite}`]: "blue", // 树突
-        [`${nerveType.dendrite_nor}`]: "green", // 树突
+        [`${nerveType.axon}`]: "red", // axon
+        [`${nerveType.axonEnd}`]: "orange", // axon end
+        [`${nerveType.dendrite}`]: "blue", // dendrite
+        [`${nerveType.dendrite_nor}`]: "green", // dendrite
       }[getPartProp(data, "type")];
     },
     getInfoStr(data, keys) {

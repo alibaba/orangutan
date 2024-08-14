@@ -15,7 +15,7 @@ for region in REGION_INDEX_MAP.values():
 
 SOMA_SLICE_MAP = {region_name: {} for region_name in REGION.keys()}
 
-soma_slice_start = 1  # 第0个用来存放空soma
+soma_slice_start = 1  # The first one is used to store an empty soma.
 for region_name, region_info in REGION.items():
     region_name = region_info['region_name']
     region_shape = region_info['region_shape']

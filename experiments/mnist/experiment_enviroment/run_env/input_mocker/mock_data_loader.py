@@ -1,4 +1,4 @@
-# 根据给定的mock数据列表，顺序加载mock数据
+# Based on the given mock data list, load the mock data in order.
 class Mock_data_loader():
 
     def __init__(self, mock_data_list=[]):

@@ -40,7 +40,7 @@ def update_neuron_2_map(
     neuron_no['neuron_no'] += 1
     marker['marker'] += 1
     assert (neuron_map.get(
-        neuron['name']) == None), f'神经突名称重复: {neuron["name"]}'
+        neuron['name']) == None), f'Neuronal dendrites are duplicated: {neuron["name"]}'
     neuron_map[neuron['name']] = neuron
     for dendrite in neuron.get('dendrites', []):
         dendrite['post_name'] = neuron['name']
@@ -127,7 +127,7 @@ def make_regions_map_with_config(regions_config):
         region['start_ind'] = start_ind
         region['end_ind'] = start_ind + region['static_part_sum_in_region']
         assert (regions_map.get(
-            region['region_name']) == None), f'脑区名称重复: {region["region_name"]}'
+            region['region_name']) == None), f'Neuronal dendrites are duplicated: {region["region_name"]}'
         regions_map[region['region_name']] = region
         start_ind += region['static_part_sum_in_region']
 

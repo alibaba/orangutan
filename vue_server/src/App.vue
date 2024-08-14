@@ -158,7 +158,7 @@ export default {
         switch (type) {
           case "readFileRes":
             console.log("[readFileRes]");
-            message.success(`读取成功：${fileData.nerves.type.length}`);
+            message.success(`read succ：${fileData.nerves.type.length}`);
             if (fileData.allFileName) {
               this.allFileName = fileData.allFileName;
             }
@@ -181,7 +181,6 @@ export default {
             );
 
             setTimeout(() => {
-              // debug：用于自动查看下一个注意力竞争结果并记录扫视轨迹
               // this.autoNextFileName();
             }, 10);
 
@@ -203,9 +202,9 @@ export default {
             break;
           case "modify_connect":
             if (fileData.success === true) {
-              message.success("保存成功");
+              message.success("save succ");
             } else {
-              message.success("保存失败");
+              message.success("save fail");
             }
             break;
           case "require_soma_name_res":
@@ -226,17 +225,17 @@ export default {
       document.addEventListener("contextmenu", this.onContextmenu.bind(this));
     },
     copyText(text) {
-      let textarea = document.createElement("textarea"); //创建input元素
+      let textarea = document.createElement("textarea");
       textarea.style.position = "fixed";
-      const currentFocus = document.activeElement; //当前获得焦point的元素，保存一下
-      document.body.appendChild(textarea); //添加元素
+      const currentFocus = document.activeElement;
+      document.body.appendChild(textarea);
       textarea.value = text;
       textarea.focus();
-      textarea.setSelectionRange(0, textarea.value.length); //获取光标起始位置到结束位置
+      textarea.setSelectionRange(0, textarea.value.length);
       document.execCommand("copy");
-      document.body.removeChild(textarea); //删除元素
-      currentFocus.focus(); //恢复焦point
-      message.success("复制成功");
+      document.body.removeChild(textarea);
+      currentFocus.focus();
+      message.success("copy succ");
     },
     setReadFileName(readFileName) {
       this.updateOptions({ readFileName });
@@ -421,7 +420,6 @@ export default {
     },
     addConnect(fromData, toData, addWay = "add_connection") {
       if (!this.options.nowaFormProcess) {
-        // alert("需要先选中一个form_process");
         return;
       }
       this.sendMessage("add_connect", {

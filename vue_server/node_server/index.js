@@ -5,7 +5,6 @@ var WebSocketServer = require('ws').Server,
 
 console.log('listening on port:', port);
 
-// 连接池
 let clients = {};
 const CLIENT_NAME = {
   python: 'python',
@@ -13,11 +12,9 @@ const CLIENT_NAME = {
 };
 
 wss.on('connection', function(ws) {
-  // 将该连接加入连接池
   const { protocol } = ws;
   clients[protocol] = ws;
 
-  // 如果是h5端建立了连接，向python端发送一个建联通知
   if (protocol.startsWith('h5')) {
     sendMessage2Client(protocol, 'python', 'h5_connected');
   }
@@ -33,13 +30,11 @@ wss.on('connection', function(ws) {
   });
 
   ws.on('close', function(ws) {
-    // 连接关闭时，将其移出连接池
     delete clients[protocol];
   });
 });
 
 function sendMessage2Client(from_protocol, to_protocol, type, data = {}) {
-  // console.log(from_protocol, to_protocol, type, data);
   const ws = clients[to_protocol];
   const message = { type, data, from_protocol };
   ws

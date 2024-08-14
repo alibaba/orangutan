@@ -16,6 +16,6 @@ def is_can_write(cortex_obj, write_stage):
     return is_can_write
 
 
-# 记录动态变化的attribute
+# record dynamic changing attribute
 WRITE_NERVE_PROPS = CORTEX_OPTS['WRITE_NERVE_PROPS']
 WRITE_PART_PROPS = [k for k, v in PART_PROPS.items() if k in WRITE_NERVE_PROPS]

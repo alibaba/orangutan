@@ -1,14 +1,14 @@
 import numpy as np
 from .nerve_params import SRP, NRP
 
-# 神经类型
+# neural type
 TYPE = {
     type_name: type_ind
     for type_ind, type_name in enumerate(
         [
-            "soma",  # 胞体
-            "axon",  # 轴突
-            "axon_end",  # 轴突末端
+            "soma",  # soma
+            "axon",  # axon
+            "axon_end",  # axonend
         ]
     )
 }
@@ -16,11 +16,11 @@ DENDRITE_TYPE = {
     type_name: type_ind + len(TYPE)
     for type_ind, type_name in enumerate(
         [
-            "dendrite_min",  # min树突
-            "dendrite_max",  # max树突
-            "dendrite_add",  # add树突
-            "dendrite_weight",  # 加权求和树突
-            "dendrite_multi",  # 相乘
+            "dendrite_min",  # min dendrite
+            "dendrite_max",  # max dendrite
+            "dendrite_add",  # add dendrite
+            "dendrite_weight",  # weight add dendrite
+            "dendrite_multi",  #  dendrite
         ]
     )
 }
@@ -28,7 +28,7 @@ TYPE.update(DENDRITE_TYPE)
 TYPE.update({"spine_connect": len(TYPE)})
 STATIC_TYPES = [TYPE["soma"], TYPE["axon"], *DENDRITE_TYPE.values()]
 
-# 0：不是突触 1：先验突触 2：预测突触 3：易化突触 4：stp突触 5：易化stp突触
+# 0: Non-synaptic 1: Presynaptic 2: Postsynaptic 3: Facilitated 4: STP (Short-Term Plasticity) 5: Facilitated STP (Short-Term Plasticity)
 SYNAPSE_TYPE = {
     synapse_type: synapse_type_value
     for synapse_type_value, synapse_type in enumerate(
@@ -52,7 +52,7 @@ RELEASE_TYPE = {
     )
 }
 
-# 神经attribute
+# neural attribute
 def part_prop_tuple(dtype, value):
     if value == "RP":
         prop_tuple = (dtype, SRP, *[NRP] * (len(TYPE) - 1))
@@ -89,8 +89,8 @@ SPINE_EXINFO = {
     )
 }
 
-# TODO 非学习模式下，用不到一些attribute，可以不进行初始化，节省计算资源
-# 同时也可以在cortex的计算过程上省略一部分计算步骤，加速计算速度
+# TODO Translation: In non-learning mode, some attributes that are not needed do not need to be initialized, saving computational resources.
+# At the same time, it is also possible to omit some calculation steps in the cortex calculation process to speed up the calculation speed.
 nerve_prop_meta_info = {
     ("static", "type"): ("int8", "TYPE"),
     ("static", "mother_type"): ("int8", 0),
@@ -133,31 +133,31 @@ nerve_prop_meta_info = {
     ("one_tick", "seretonin_remain"): ("float", 0),
     ("one_tick", "post_synapse_LTP_sum"): ("float", 0),
     ("one_tick", "will_recv_excite"): ("int8", 0),
-    # ''' 0：非全或无 1：弱全或无，传递后的兴奋的正负号要等于所传递的兴奋的正负号时才传递 2：强全或无，传递后的兴奋的正负号等于所传递的兴奋的正负号，或等于0时就传递 '''
+    # ''' 0: Not all or none 1: Weak all or none, the sign of the transmitted excitation must be equal to the sign of the excitation transmitted in order to be transmitted 2: Strong all or none, the sign of the transmitted excitation is equal to the sign of the transmitted excitation, or equal to 0 if transmitted
     ("static", "all_or_none"): ("int8", 0),
     ("static", "step_length"): ("int8", 1),
     ("one_tick", "current_step"): ("int8", 1),
     ("one_tick", "refractory"): (
         "int8",
         0,
-    ),  # 0：不启用不应期，1：启用不应期，2：处于不应期
+    ),  # 0: No grace period enabled, 1: Grace period enabled, 2: In grace period
     ("one_tick", "is_active"): ("int8", 0),
     ("static", "is_synapse"): (
         "int8",
         0,
-    ),  # 0：不是突触 1：是突触 2：是刚刚新增或刚刚被强化的突触
+    ),  # 0: Not a synapse 1: Is a synapse 2: Is a newly added or recently strengthened synapse
     ("static", "synapse_type"): (
         "int8",
         SYNAPSE_TYPE["no_synapse"],
-    ),  # -1：树突棘 0：不是突触 1：先验突触 2：预测突触 3：易化突触 4：stp突触 5：易化stp突触
+    ),  # -1：Dendritic spine 0：Not a synapse 1：Primer synapse 2：Predictive synapse 3：Facilitated synapse 4：STP synapse 5：Facilitated STP synapse
     ("static", "self_synapse"): (
         "int8",
         0,
-    ),  # 0：非自突触 1：是自突触，但可以被强制清除 2：是自突触，且不可被强制清除
+    ),  # 0: Non-autonomous synapse 1: Autonomus synapse, but can be forcibly cleared 2: Autonomus synapse, and cannot be forcibly cleared
     ("static", "spontaneous_firing"): ("int", 0),
-    ("one_tick", "float_util"): ("float", 0),  # 工具矩阵
-    ("one_tick", "int_util"): ("int", 0),  # 工具矩阵
-    ("one_tick", "bool_util"): ("bool", False),  # 工具矩阵
+    ("one_tick", "float_util"): ("float", 0),  # tool matrix
+    ("one_tick", "int_util"): ("int", 0),  # tool matrix
+    ("one_tick", "bool_util"): ("bool", False),  # tool matrix
     ("one_tick", "spine_active"): ("float", 0),
     ("one_tick", "anti_spine_active"): ("int", 0),
     ("one_tick", "max_circuit_length"): ("int", 0),
@@ -183,7 +183,7 @@ STATIC_PROP_DTYPE = [
 ]
 STATIC_PROP_NAMES = [prop_name for prop_name, prop_dtype in STATIC_PROP_DTYPE]
 
-# 神经attribute结构化数组
+# Structured array of attributed nerves.
 PART_PROPS_KEYS_MAP = {k: i for i, k in enumerate(PART_PROPS.keys())}
 PART_PROPS_DTYPE = [(k, v[0]) for k, v in PART_PROPS.items()]
 PART_PROPS_MATRIX = np.array(

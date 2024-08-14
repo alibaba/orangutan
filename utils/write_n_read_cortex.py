@@ -54,7 +54,7 @@ class Write_n_read_cortex():
             if not os.path.exists(path):
                 os.makedirs(path)
 
-    # 将神经元状态写入json文件
+    # Write the neuron state into a json file.
     def write_cortex(self,
                      cortex_obj,
                      base_data,
@@ -98,7 +98,7 @@ class Write_n_read_cortex():
             self.nowa_file_name = file_name
             read_posterioir_tick = file_name.split(';')[0].split('_')[1]
 
-        # 根据当前的文件名，加载对应的后验突触
+        # Based on the current file name, load the corresponding post-synaptic receptor.
         if CORTEX_OPTS['render_load_cortex_name'] == 'cortex_save_posterior':
             self.read_posterioir_tick = read_posterioir_tick
             self.load_cortex_save_data(

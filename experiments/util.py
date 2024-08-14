@@ -35,20 +35,20 @@ def get_soma_inds(
     mini_col_inds_in_hyper_col="all_mini_col",
 ):
     """
-    批量获得符合条件的神经元的胞体或其他房室的索引值（除了突触以外）
+    Get the indices of the soma or other compartments of neurons that meet the specified criteria in bulk (excluding synapses).
 
-    例子：
-        调用: get_soma_inds("point", f"45.0方向的边缘point")
-        Returns: array([2418, 2419, 2420, 2421, 2422, ... 3197, 3198, 3199, 3200, 3201])
+    Example:
+    Call: get_soma_inds("region_name", "neuron_names")
+    Returns: array([2418, 2419, 2420, 2421, 2422, ... 3197, 3198, 3199, 3200, 3201])
 
     Parameters:
-        region_name (str): 脑区名称
-        neuron_names (str): 神经元房室名称
-        hyper_col_inds_in_region (str|int): 位于该脑区inner的超柱的索引 default("all_hyper_col")
-        mini_col_inds_in_hyper_col (str|int): 位于每个超柱inner的微柱的索引 default("all_mini_col")
+    region_name (str): Name of the brain region
+    neuron_names (str): Name of the neuron compartments
+    hyper_col_inds_in_region (str|int): Index of the hypercolumn located within the inner of the brain region, default("all_hyper_col")
+    mini_col_inds_in_hyper_col (str|int): Index of the minicolumn located within each hypercolumn's inner, default("all_mini_col")
 
     Returns:
-        numpy.array: 所有符合条件的房室的索引值
+    numpy.array: Indices of all compartments that meet the specified criteria.
     """
 
     region_soma_slice = SOMA_SLICE_MAP.get(region_name)
@@ -149,7 +149,7 @@ def get_mini_col_inds(region_info):
 
 def get_gray_matrix_and_mask(path, rotate_time):
     I = Image.open(path)
-    L = I.convert("L")  # 转化为灰度图
+    L = I.convert("L")  # Convert to grayscale image
     gray_matrix = 255 - np.asarray(L)
     gray_matrix[gray_matrix < 10] = 0
     gray_matrix = np.rot90(gray_matrix, -rotate_time)
@@ -171,18 +171,17 @@ def get_gray_mesh_grid(gray_mask):
 def get_around_and_center_hyper_col_inds_with_around_mask(
     around_region_name, center_region_name, around_mask, indicate_a_center_pos=None
 ):
-    """
-    基于一个外周感受野的掩码来批量获取两个脑区下可以建立突触的皮质超柱的索引
+    """Based on a mask of the peripheral receptive field, batch retrieval of the indices of cortical hypercolumns that can establish synapses in two brain areas is performed.
 
     Parameters:
-        around_region_name (str): 位于外周感受野的皮质超柱所在的脑区名称
-        center_region_name (str): 位于中央感受野的皮质超柱所在的脑区名称
-        around_mask (numpy.array): 感受野的掩码
+        around_region_name (str): Name of the brain area where the cortical hypercolumns located in the peripheral receptive field are located
+        center_region_name (str): Name of the brain area where the cortical hypercolumns located in the central receptive field are located
+        around_mask (numpy.array): Mask of the receptive field
 
     Returns:
-        around_pos_inds (numpy.array): 位于外周感受野的皮质超柱在脑区inner的索引
-        center_pos_inds (numpy.array): 位于中央感受野的皮质超柱在脑区inner的索引
-        inrange_around_pos_mask (numpy.array): 外周感受野的皮质超柱的索引在脑区范围([0,该脑区的皮质超柱的总量])inner，进而可以正常与中央感受野的皮质超柱建立突触的掩码
+        around_pos_inds (numpy.array): Indices of the cortical hypercolumns located in the peripheral receptive field in the brain area "inner"
+        center_pos_inds (numpy.array): Indices of the cortical hypercolumns located in the central receptive field in the brain area "inner"
+        inrange_around_pos_mask (numpy.array): Indices of the cortical hypercolumns in the peripheral receptive field are within the brain region range ([0, total number of cortical hypercolumns in that brain region]) "inner", which can then be used to establish synapse masks with the cortical hypercolumns in the central receptive field.
     """
 
     around_mask = around_mask.astype(bool)
@@ -214,7 +213,7 @@ def get_around_and_center_hyper_col_inds_with_around_mask(
     inrange_around_pos_mask *= around_pos_grid[1, :] < center_region_h
     inrange_around_pos_mask *= around_mask
     inrange_around_pos_mask_shape = inrange_around_pos_mask.shape
-    # # 中央的point不能连接
+    # # The central point cannot be connected.
     # inrange_around_pos_mask[:, inrange_around_pos_mask_shape[1] // 2 + 1 -
     #                         1, inrange_around_pos_mask_shape[2] // 2 + 1 -
     #                         1] = False
@@ -285,12 +284,10 @@ def save_new_axon_inds_to(axon_inds, save_to_targ_name):
 
 
 def save_axon_end_inds_with_new_nerves(axon_end_inds_map, axon_end_name):
-    """
-    保存新生的突触索引值
-
+    """ Translate: Save the index value of the new synaptic bouton
     Parameters:
-        axon_end_inds_map (dict): 用于保存突触索引的字典
-        axon_end_name (str): 用于保存突触索引的键名
+        axon_end_inds_map (dict): dictionary for saving the synaptic index
+        axon_end_name (str): key name for saving the synaptic index
     """
 
     def do_save(new_nerve_slice, cortex_obj):
@@ -437,15 +434,15 @@ def cal_deg(xy, xy1):
     a = np.array(xy)
     b = np.array(xy1)
 
-    # 计算a的范数（长度）
+    # Calculate the norm (length) of a
     a_norm = np.linalg.norm(a)
-    # 计算b的范数（长度）
+    # Calculate the norm (length) of b
     b_norm = np.linalg.norm(b)
-    # 计算a和b的point积（相应位置相乘再把结果相加）
+    # Calculate the dot product of a and b (multiply corresponding positions and then add the results).
     a_dot_b = a.dot(b)
-    # 使用余弦定理计算cos_there的弧度值
+    # Calculate the radian value of cos_there using the cosine theorem.
     cos_theta = np.arccos(a_dot_b / (a_norm * b_norm))
-    # 将弧度转化为度
+    # To convert radians to degrees
     angle = np.rad2deg(cos_theta)
     if np.isnan(angle):
         if (a == 0).all() or (b == 0).all():
@@ -458,9 +455,9 @@ def cal_deg(xy, xy1):
 
 
 def get_vector_x_and_y(length, angle):
-    # 将angle转换为弧度
+    # Convert angle to radians.
     angle_rad = math.radians(angle)
-    # 计算临边和对边
+    # Calculate the adjacent side and the opposite side.
     x = length * math.sin(angle_rad)
     y = length * math.cos(angle_rad)
     return x, y
@@ -468,28 +465,28 @@ def get_vector_x_and_y(length, angle):
 
 def get_orient_distance_matrix(orient, matrix_wh, orient_range):
     """
-    获得一个神经元与其周边的每个神经元的相对orientation和一个特定orientation的近似比率
+    Get a relative orientation of a neuron with each neighboring neuron and an approximate ratio of a specific orientation.
 
-    伪代码：
-        1. 创建一个宽高相等且为奇数的矩阵
-        2. 以矩阵中心作为原point建立一个Y轴向下、X轴向右的直angle坐标系并将其映射到一个orientationangle系统（向量(x=0,y=-1)对应于360度或0度orientationangle）
-        3. 计算每个向量(x,y)的orientationangle与给定orientation的偏移量绝对值
-        4. 计算偏移量绝对值相对于特定偏移范围的偏移比率
-        5. 返回近似比率矩阵=1-偏移比率矩阵
+    Pseudocode:
+    1. Create a matrix with equal width and height, and both odd.
+    2. Establish a Y-axis down, X-axis to the right angle coordinate system with the center of the matrix as the origin point, and map it to an orientation angle system (the vector (x=0, y=-1) corresponds to an orientation angle of 360 degrees or 0 degrees).
+    3. Calculate the absolute value of the offset of each vector (x, y) from the orientation angle given.
+    4. Calculate the offset ratio relative to the specific offset range.
+    5. Return the approximate ratio matrix = 1 - offset ratio matrix.
 
-    例子：
-        调用: get_orient_distance_matrix(45.0, 3, 90.0)
-        Returns: array([[0.        , 0.5       , 1         ],
-                        [0.        , 0.        , 0.5       ],
-                        [0.        , 0.        , 0.        ]])
+    Example:
+    Call: get_orient_distance_matrix(45.0, 3, 90.0)
+    Returns: array([[0.        , 0.5       , 1         ],
+                    [0.        , 0.        , 0.5       ],
+                    [0.        , 0.        , 0.        ]])
 
     Parameters:
-        orient (float): face
-        matrix_wh (int): 矩阵的宽高，奇数
-        orient_range (float): 计算偏移比率的偏移范围，偏移比率=偏移量/偏移范围
+    orient (float): face
+    matrix_wh (int): width and height of the matrix, odd
+    orient_range (float): the offset range for calculating the offset ratio, offset ratio = offset value/offset range
 
     Returns:
-        numpy.array: 由第5步计算得到的近似比率矩阵
+    numpy.array: The approximate ratio matrix calculated from step 5.
     """
 
     base_axis = np.arange(-(matrix_wh // 2), matrix_wh // 2 + 1)

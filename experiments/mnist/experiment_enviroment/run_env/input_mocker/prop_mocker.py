@@ -134,15 +134,15 @@ class Prop_mocker(Abstract_mocker):
         cortex = self.cortex
         nowa_feature_data = self.mock_data_loader.current_data
         feature_name = nowa_feature_data['feature_name']
-        # # 第0个序列是实际观察序列
+        # # The 0th sequence is the actual observed sequence.
         # feature_name += '_0'
 
-        # # 对每个特征的抽象细胞建立或强化突触前，都要将is_new_synapse置为0
-        # # 避免之前的特征的抽象细胞建立或强化突触后，将is_new_synapse变为1，导致当前特征的抽象细胞无法正常建立或强化突触
+        # # Establish or strengthen synapses for the abstract cells of each feature, is_new_synapse must be set to 0.
+        # # After avoiding the establishment or strengthening of synapses with previous features, setting is_new_synapse to 1 results in the inability of the current feature's abstract cells to properly establish or strengthen synapses.
         # # cortex['is_new_synapse'][:] = 0
         # cortex['is_synapse'][cortex['is_synapse'] == 2] = 1
 
-        # mockattribute的excite
+        # excite of mockattribute
         if nowa_feature_data.get('mock_excites'):
             mock_soma_inds = nowa_feature_data.get('mock_inds')
         else:
@@ -182,7 +182,7 @@ class Prop_mocker(Abstract_mocker):
 
         mock_axon_inds = self.get_axon_inds_of_somas(mock_soma_inds)
 
-        # mock兴奋
+        # Mock excitement
         cortex['excite'][self.appear_and_disappear_nerve_inds] = cortex['RP'][[
             self.appear_and_disappear_nerve_inds
         ]]
@@ -192,11 +192,11 @@ class Prop_mocker(Abstract_mocker):
         self.cortex_obj.vary_soma_inds = set(
             self.appear_and_disappear_soma_inds)
 
-        # mockattribute的tick_spike_times
+        # tick_spike_times of mockattribute 
         mock_nerve_inds = [*mock_soma_inds, *mock_axon_inds]
         self.cortex_obj.set_spike_times_with_excite(mock_nerve_inds)
 
-        # 直接用tick_spike_times来计算marker_remain
+        # Please calculate marker_remain directly using tick_spike_times.
         cortex['marker_remain'][self.appear_and_disappear_nerve_inds] = 0
         cortex_obj.add_marker_remain(mock_nerve_inds)
 
@@ -288,7 +288,7 @@ class Prop_mocker(Abstract_mocker):
         cortex = self.cortex
         feature_name = self.mock_data_loader.current_data['feature_name']
 
-        # mock网格位置
+        # mock grid position
         cortex['excite'][NOWA_FEATURE_GRID_INDS] = self.load_props(
             feature_name, 'grid')
         cortex['excite'][WHOLE_CENTER_GRID_INDS] = self.load_props(
